@@ -78,6 +78,13 @@ services:
       EVENTUATELOCAL_CDC_SOURCE_TABLE_NAME: message
       SPRING_PROFILES_ACTIVE: EventuatePolling
 
+  gatewayservice:
+    build: ./gateway-service/
+    ports:
+      - "8084:8080"
+    environment:
+      - ADVERTISED_HOST_NAME=${DOCKER_HOST_IP}
+
   zookeeper:
     image: eventuateio/eventuate-zookeeper:$EVENTUATE_COMMON_VERSION
     ports:
