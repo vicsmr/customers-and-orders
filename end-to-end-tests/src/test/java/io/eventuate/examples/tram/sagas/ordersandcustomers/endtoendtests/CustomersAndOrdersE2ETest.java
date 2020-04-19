@@ -3,13 +3,15 @@ package io.eventuate.examples.tram.sagas.ordersandcustomers.endtoendtests;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.commondomain.Money;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.webapi.CreateCustomerRequest;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.webapi.CreateCustomerResponse;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.common.ProductDetails;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.OrderState;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.RejectionReason;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.webapi.CreateOrderRequest;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.webapi.CreateOrderResponse;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.webapi.GetOrderResponse;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.products.webapi.CreateProductRequest;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.products.webapi.CreateProductResponse;
 import io.eventuate.util.test.async.Eventually;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,9 +46,12 @@ public class CustomersAndOrdersE2ETest{
   public void shouldApprove() {
     CreateCustomerResponse createCustomerResponse = restTemplate.postForObject(baseUrlCustomers("customers"),
             new CreateCustomerRequest("Fred", new Money("15.00")), CreateCustomerResponse.class);
+    
+    CreateProductResponse createProductResponse = restTemplate.postForObject(baseUrlCustomers("products"),
+            new CreateProductRequest("manzanas", 5), CreateProductResponse.class);
 
     CreateOrderResponse createOrderResponse = restTemplate.postForObject(baseUrlOrders("orders"),
-            new CreateOrderRequest(createCustomerResponse.getCustomerId(), new Money("12.34")), CreateOrderResponse.class);
+            new CreateOrderRequest(createCustomerResponse.getCustomerId(), new Money("12.34"), new ProductDetails(createProductResponse.getProductId(), 5)), CreateOrderResponse.class);
 
     assertOrderState(createOrderResponse.getOrderId(), OrderState.APPROVED, null);
   }
@@ -57,9 +60,12 @@ public class CustomersAndOrdersE2ETest{
   public void shouldRejectBecauseOfInsufficientCredit() {
     CreateCustomerResponse createCustomerResponse = restTemplate.postForObject(baseUrlCustomers("customers"),
             new CreateCustomerRequest("Fred", new Money("15.00")), CreateCustomerResponse.class);
+    
+    CreateProductResponse createProductResponse = restTemplate.postForObject(baseUrlCustomers("products"),
+            new CreateProductRequest("manzanas", 5), CreateProductResponse.class);
 
     CreateOrderResponse createOrderResponse = restTemplate.postForObject(baseUrlOrders("orders"),
-            new CreateOrderRequest(createCustomerResponse.getCustomerId(), new Money("123.40")), CreateOrderResponse.class);
+            new CreateOrderRequest(createCustomerResponse.getCustomerId(), new Money("123.40"), new ProductDetails(createProductResponse.getProductId(), 5)), CreateOrderResponse.class);
 
     assertOrderState(createOrderResponse.getOrderId(), OrderState.REJECTED, RejectionReason.INSUFFICIENT_CREDIT);
   }
@@ -67,8 +73,11 @@ public class CustomersAndOrdersE2ETest{
   @Test
   public void shouldRejectBecauseOfUnknownCustomer() {
 
+    CreateProductResponse createProductResponse = restTemplate.postForObject(baseUrlCustomers("products"),
+            new CreateProductRequest("manzanas", 5), CreateProductResponse.class);
+
     CreateOrderResponse createOrderResponse = restTemplate.postForObject(baseUrlOrders("orders"),
-            new CreateOrderRequest(Long.MAX_VALUE, new Money("123.40")), CreateOrderResponse.class);
+            new CreateOrderRequest(Long.MAX_VALUE, new Money("123.40"), new ProductDetails(createProductResponse.getProductId(), 5)), CreateOrderResponse.class);
 
     assertOrderState(createOrderResponse.getOrderId(), OrderState.REJECTED, RejectionReason.UNKNOWN_CUSTOMER);
   }

@@ -13,12 +13,16 @@ public class OrderDetails {
   @Embedded
   private Money orderTotal;
 
+  @Embedded
+  private ProductDetails productDetails;
+
   public OrderDetails() {
   }
 
-  public OrderDetails(Long customerId, Money orderTotal) {
+  public OrderDetails(Long customerId, Money orderTotal, ProductDetails productDetails) {
     this.customerId = customerId;
     this.orderTotal = orderTotal;
+    this.productDetails = productDetails;
   }
 
   public Long getCustomerId() {
@@ -27,5 +31,9 @@ public class OrderDetails {
 
   public Money getOrderTotal() {
     return orderTotal;
+  }
+
+  public ProductDetails getProductDetails() {
+    return productDetails;
   }
 }

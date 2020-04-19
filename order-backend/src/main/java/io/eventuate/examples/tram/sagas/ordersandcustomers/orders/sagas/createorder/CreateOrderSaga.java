@@ -2,6 +2,9 @@ package io.eventuate.examples.tram.sagas.ordersandcustomers.orders.sagas.createo
 
 import io.eventuate.examples.tram.sagas.ordersandcustomers.commondomain.Money;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.commands.ReserveCreditCommand;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.products.api.commands.ReserveStockCommand;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.products.api.replies.ProductNotFound;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.products.api.replies.ProductStockLimitExceeded;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.replies.CustomerCreditLimitExceeded;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.replies.CustomerNotFound;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.Order;
@@ -30,6 +33,10 @@ public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
             .onReply(CustomerNotFound.class, this::handleCustomerNotFound)
             .onReply(CustomerCreditLimitExceeded.class, this::handleCustomerCreditLimitExceeded)
           .step()
+            .invokeParticipant(this::reserveStock)
+            .onReply(ProductNotFound.class, this::handleProductNotFound)
+            .onReply(ProductStockLimitExceeded.class, this::handleProductStockLimitExceeded)
+          .step()
             .invokeLocal(this::approve)
           .build();
 
@@ -41,6 +48,14 @@ public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
     data.setRejectionReason(RejectionReason.INSUFFICIENT_CREDIT);
   }
 
+  private void handleProductNotFound(CreateOrderSagaData data, ProductNotFound reply) {
+    System.out.println("FIESTAAAAAAAAAAA");
+    data.setRejectionReason(RejectionReason.UNKNOWN_PRODUCT);
+  }
+
+  private void handleProductStockLimitExceeded(CreateOrderSagaData data, ProductStockLimitExceeded reply) {
+    data.setRejectionReason(RejectionReason.NO_STOCK);
+  }
 
   @Override
   public SagaDefinition<CreateOrderSagaData> getSagaDefinition() {
@@ -59,6 +74,15 @@ public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
     Money orderTotal = data.getOrderDetails().getOrderTotal();
     return send(new ReserveCreditCommand(customerId, orderId, orderTotal))
             .to("customerService")
+            .build();
+  }
+
+  private CommandWithDestination reserveStock(CreateOrderSagaData data) {
+    long orderId = data.getOrderId();
+    Long productId = data.getOrderDetails().getProductDetails().getProductId();
+    int productAmount = data.getOrderDetails().getProductDetails().getProductAmount();
+    return send(new ReserveStockCommand(productId, orderId, productAmount))
+            .to("productService")
             .build();
   }
 

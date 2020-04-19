@@ -7,6 +7,7 @@ import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.Order;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.OrderRepository;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.domain.OrderState;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.common.OrderDetails;
+import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.common.ProductDetails;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.orders.service.OrderService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public abstract class AbstractOrdersAndCustomersIntegrationTest {
   public void shouldApproveOrder() throws InterruptedException {
     Money creditLimit = new Money("15.00");
     Customer customer = customerService.createCustomer("Fred", creditLimit);
-    Order order = orderService.createOrder(new OrderDetails(customer.getId(), new Money("12.34")));
+    Order order = orderService.createOrder(new OrderDetails(customer.getId(), new Money("12.34"), new ProductDetails(104L, 5)));
 
     assertOrderState(order.getId(), OrderState.APPROVED);
   }
@@ -43,7 +44,7 @@ public abstract class AbstractOrdersAndCustomersIntegrationTest {
   public void shouldRejectOrder() throws InterruptedException {
     Money creditLimit = new Money("15.00");
     Customer customer = customerService.createCustomer("Fred", creditLimit);
-    Order order = orderService.createOrder(new OrderDetails(customer.getId(), new Money("123.40")));
+    Order order = orderService.createOrder(new OrderDetails(customer.getId(), new Money("123.40"), new ProductDetails(104L, 5)));
 
     assertOrderState(order.getId(), OrderState.REJECTED);
   }

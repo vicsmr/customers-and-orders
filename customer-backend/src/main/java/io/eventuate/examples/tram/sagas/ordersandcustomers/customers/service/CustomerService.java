@@ -1,18 +1,10 @@
 package io.eventuate.examples.tram.sagas.ordersandcustomers.customers.service;
 
 import io.eventuate.examples.tram.sagas.ordersandcustomers.commondomain.Money;
-import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.commands.ReserveCreditCommand;
-import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.replies.CustomerCreditLimitExceeded;
-import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.replies.CustomerCreditReserved;
-import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.api.replies.CustomerNotFound;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.domain.Customer;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.domain.CustomerCreditLimitExceededException;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.domain.CustomerNotFoundException;
 import io.eventuate.examples.tram.sagas.ordersandcustomers.customers.domain.CustomerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import static io.eventuate.tram.commands.consumer.CommandHandlerReplyBuilder.withFailure;
-import static io.eventuate.tram.commands.consumer.CommandHandlerReplyBuilder.withSuccess;
 
 public class CustomerService {
 

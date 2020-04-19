@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 public class OrderController {
 
@@ -28,7 +26,8 @@ public class OrderController {
 
   @RequestMapping(value = "/orders", method = RequestMethod.POST)
   public CreateOrderResponse createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
-    Order order = orderService.createOrder(new OrderDetails(createOrderRequest.getCustomerId(), createOrderRequest.getOrderTotal()));
+    Order order = orderService.createOrder(new OrderDetails(createOrderRequest.getCustomerId(), 
+    createOrderRequest.getOrderTotal(), createOrderRequest.getProductDetails()));
     return new CreateOrderResponse(order.getId());
   }
 
