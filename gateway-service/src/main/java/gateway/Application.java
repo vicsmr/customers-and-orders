@@ -17,17 +17,11 @@ public class Application {
 	public RouteLocator myRoutes(RouteLocatorBuilder builder) {
 		return builder.routes()
 					.route(p -> p
-						.path("/orders")
-						.uri("http://" + hostName + ":8081"))
-					.route(p -> p
 						.path("/orders/**")
 						.uri("http://" + hostName + ":8081"))
 					.route(p -> p
 						.path("/customers")
 						.uri("http://" + hostName + ":8082"))
-					.route(p -> p
-						.path("/products")
-						.uri("http://" + hostName + ":8083"))
 					.route(p -> p
 						.path("/products/**")
 						.uri("http://" + hostName + ":8083"))
